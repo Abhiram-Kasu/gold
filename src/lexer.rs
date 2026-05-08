@@ -49,6 +49,9 @@ pub enum Token {
             slice[1..slice.len()-1].as_bytes()[0]
         })]
     CharLiteral(u8),
+    #[token("true", |_| true)]
+    #[token("false", |_| false)]
+    BoolLiteral(bool),
 }
 
 #[cfg(test)]
@@ -59,6 +62,15 @@ mod lexer_tests {
 
     fn parse<'a>(str: &'a str) -> Lexer<'a, Token> {
         Token::lexer(str)
+    }
+
+    fn assert_same(lexer: Lexer<Token>, expected: &[Token]) {
+        let res = lexer.flatten().collect::<Vec<Token>>();
+        assert_eq!(res.as_slice(), expected);
+    }
+
+    fn assert_tokens(str: &str, expected: &[Token]) {
+        assert_same(parse(str), expected);
     }
 
     #[test]
@@ -99,10 +111,30 @@ mod lexer_tests {
     #[test]
     fn testCharVariable() {
         let mut res = parse("let char = 'H'");
-        assert_eq!(res.next(), Some(Ok(Token::Let)));
+        use Token::*;
+        assert_same(
+            res,
+            &[
+                Let,
+                Identifier("char".into()),
+                Equals,
+                CharLiteral('H' as u8),
+            ],
+        );
+    }
 
-        assert_eq!(res.next(), Some(Ok(Token::Identifier("char".into()))));
-        assert_eq!(res.next(), Some(Ok(Token::Equals)));
-        assert_eq!(res.next(), Some(Ok(Token::CharLiteral('H' as u8))));
+    #[test]
+    fn testBoolVariable() {
+        use Token::*;
+        assert_tokens(
+            "let item: Bool  = false",
+            &[
+                Let,
+                Identifier("item".into()),
+                Type("Bool".into()),
+                Equals,
+                BoolLiteral(false),
+            ],
+        );
     }
 }
