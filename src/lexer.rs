@@ -13,7 +13,7 @@
 
 use logos::Logos;
 
-#[derive(Debug, Logos, PartialEq)]
+#[derive(Debug, Logos, PartialEq, Clone)]
 #[logos(skip r"[ \t\n\f]+")] // Skip Spaces
 pub enum Token {
     #[token("let")]
@@ -28,7 +28,7 @@ pub enum Token {
     })]
     Type(String),
     #[token("=")]
-    Equals,
+    SingleEqual,
 
     #[regex(r"[0-9]+\.[0-9]+", |lex| {
         lex.slice().parse::<f64>().unwrap()
@@ -52,6 +52,23 @@ pub enum Token {
     #[token("true", |_| true)]
     #[token("false", |_| false)]
     BoolLiteral(bool),
+
+    #[token("+")]
+    Add,
+    #[token("-")]
+    Subtract,
+    #[token("*")]
+    Multiply,
+    #[token("/")]
+    Divide,
+    #[token("==")]
+    DoubleEqual,
+    #[token("!=")]
+    NotEqual,
+    #[token("<")]
+    LessThan,
+    #[token(">")]
+    GreaterThan,
 }
 
 #[cfg(test)]
@@ -79,7 +96,7 @@ mod lexer_tests {
         assert_eq!(res.next(), Some(Ok(Token::Let)));
 
         assert_eq!(res.next(), Some(Ok(Token::Identifier("item".into()))));
-        assert_eq!(res.next(), Some(Ok(Token::Equals)));
+        assert_eq!(res.next(), Some(Ok(Token::SingleEqual)));
         assert_eq!(res.next(), Some(Ok(Token::IntegerLiteral(5))));
     }
 
@@ -101,7 +118,7 @@ mod lexer_tests {
         assert_eq!(res.next(), Some(Ok(Token::Let)));
 
         assert_eq!(res.next(), Some(Ok(Token::Identifier("str".into()))));
-        assert_eq!(res.next(), Some(Ok(Token::Equals)));
+        assert_eq!(res.next(), Some(Ok(Token::SingleEqual)));
         assert_eq!(
             res.next(),
             Some(Ok(Token::StringLiteral("Hello World".into())))
@@ -117,7 +134,7 @@ mod lexer_tests {
             &[
                 Let,
                 Identifier("char".into()),
-                Equals,
+                SingleEqual,
                 CharLiteral('H' as u8),
             ],
         );
@@ -132,7 +149,7 @@ mod lexer_tests {
                 Let,
                 Identifier("item".into()),
                 Type("Bool".into()),
-                Equals,
+                SingleEqual,
                 BoolLiteral(false),
             ],
         );
