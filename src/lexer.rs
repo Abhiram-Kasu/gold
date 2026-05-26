@@ -11,7 +11,7 @@
 //
 //
 
-use logos::Logos;
+use logos::{Lexer, Logos};
 
 #[derive(Debug, Logos, PartialEq, Clone)]
 #[logos(skip r"[ \t\n\f]+")] // Skip Spaces
